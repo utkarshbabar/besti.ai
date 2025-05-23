@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your AI Bestie - Always Here For You!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Inter:wght@400;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: #5D1049;
+            overflow: hidden; /* Prevent body scroll when chat/login is full height */
+        }
+        body {
+            background: linear-gradient(135deg, #FFC0CB 0%, #FFB6C1 25%, #FFD1DC 50%, #FFF0F5 75%, #FCE4EC 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center; 
+        }
+
+        /* Login Page Styles */
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(216, 27, 96, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        .login-title {
+            font-family: 'Parisienne', cursive;
+            color: #E53E9B; /* Hot Pink */
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        .login-subtitle {
+            font-family: 'Caveat', cursive;
+            color: #D81B60; /* Medium Pink */
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .login-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: 25px;
+            border: 1px solid #F48FB1; /* Light Pink */
+            font-size: 1rem;
+            box-sizing: border-box;
+            color: #5D1049;
+        }
+        .login-input:focus {
+            border-color: #E53E9B;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.25);
+            outline: none;
+        }
+        .login-button {
+            background-color: #EC4899; /* Bright Pink */
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1.125rem;
+            box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+            border: none;
+            width: 100%;
+        }
+        .login-button:hover {
+            background-color: #D81B60;
+            transform: scale(1.03);
+        }
+        #loginErrorMessage {
+            color: #D32F2F; /* Red for error */
+            font-weight: bold;
+            margin-top: 1rem;
+            min-height: 1.5em;
+        }
+
+        /* Chat Container Styles */
+        .chat-container {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 95vh;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            margin: 1rem;
+        }
+        .chat-header {
+            background-color: #F48FB1; color: #AD1457; padding: 15px 25px; font-weight: 700; font-size: 1.35rem;
+            text-align: center; border-top-left-radius: 20px; border-top-right-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .chat-messages {
+            flex-grow: 1; padding: 25px; overflow-y: auto; background-color: #FFF8FA;
+            display: flex; flex-direction: column;
+        }
+        .chat-message {
+            margin-bottom: 15px; padding: 12px 18px; border-radius: 22px;
+            max-width: 80%; line-height: 1.6; font-size: 1rem; word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #FFC0CB; color: #5D1049; align-self: flex-end;
+            margin-left: auto; border-bottom-right-radius: 8px;
+        }
+        .bot-message {
+            background-color: #FCE4EC; color: #880E4F; align-self: flex-start;
+            border-bottom-left-radius: 8px;
+        }
+        .typing-indicator {
+            align-self: flex-start; margin-bottom: 15px; padding: 10px 15px;
+            background-color: #FCE4EC; border-radius: 22px; border-bottom-left-radius: 8px;
+        }
+        .typing-indicator span {
+            display: inline-block; width: 9px; height: 9px; margin: 0 3px;
+            background-color: #D81B60; border-radius: 50%;
+            animation: typing-pulse 1.4s infinite ease-in-out both;
+        }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing-pulse {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1.0); opacity: 1; }
+        }
+        .chat-input-area {
+            display: flex; padding: 20px; border-top: 1px solid #F8BBD0; background-color: #fff;
+        }
+        .chat-input {
+            flex-grow: 1; border: 1px solid #F48FB1; border-radius: 25px; padding: 12px 18px;
+            margin-right: 12px; outline: none; font-size: 1rem; color: #5D1049;
+        }
+        .chat-input:focus {
+            border-color: #E53E9B; box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.25);
+        }
+        .chat-send-btn {
+            background-color: #E53E9B; color: white; border: none; border-radius: 25px;
+            padding: 12px 25px; font-weight: 600; cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.2s ease; font-size: 1rem;
+        }
+        .chat-send-btn:hover { background-color: #D81B60; transform: scale(1.03); }
+        .heart-icon { display: inline-block; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        
+        .hidden { display: none !important; }
+
+        .welcome-overlay-chat {
+            width: 100%; text-align: center; padding: 20px; box-sizing: border-box;
+            opacity: 1; transition: opacity 0.5s ease-out 1s;
+        }
+        .welcome-overlay-chat.hidden {
+            opacity: 0; height: 0; padding: 0; margin:0; pointer-events: none; overflow: hidden;
+        }
+        .welcome-title-chat {
+            font-family: 'Parisienne', cursive; color: #E53E9B; font-size: 2.5rem; margin-bottom: 0.25rem;
+        }
+        .welcome-subtitle-chat {
+            font-family: 'Caveat', cursive; color: #D81B60; font-size: 1.25rem; margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loginPage" class="login-container">
+        <h1 class="login-title">Bestie's Chat <span class="heart-icon">&hearts;</span></h1>
+        <p class="login-subtitle">A special place, just for you!</p>
+        <div>
+            <input type="text" id="usernameInput" class="login-input" placeholder="Username">
+        </div>
+        <div>
+            <input type="password" id="passwordInput" class="login-input" placeholder="Password">
+        </div>
+        <button id="loginButton" class="login-button">Enter a World of Friendship</button>
+        <p id="loginErrorMessage"></p>
+        <p class="text-xs text-pink-500 mt-4">Psst! This login is just for fun & a special welcome! It's not super-duper secure like big websites, okay? All chats are just between you and your browser. 😉</p>
+    </div>
+
+    <div id="chatAppContainer" class="chat-container hidden">
+        <div class="chat-header">
+            <span id="chatHeaderTitle">Your AI Bestie <span class="heart-icon">&hearts;</span></span>
+        </div>
+        <div id="chatMessages" class="chat-messages">
+            <div id="welcomeOverlayChat" class="welcome-overlay-chat">
+                <h1 id="welcomeTitleChat" class="welcome-title-chat">Hello My Dearest Bestie!</h1>
+                <p id="welcomeSubtitleChat" class="welcome-subtitle-chat">I'm always here to listen, laugh, and share with you. <span class="heart-icon">&hearts;</span></p>
+                <p class="text-sm text-pink-600">Type your first message below to begin our chat!</p>
+            </div>
+            </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" class="chat-input" placeholder="Share your thoughts, bestie...">
+            <button id="chatSendBtn" class="chat-send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginPage = document.getElementById('loginPage');
+            const chatAppContainer = document.getElementById('chatAppContainer');
+            const usernameInput = document.getElementById('usernameInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const loginButton = document.getElementById('loginButton');
+            const loginErrorMessage = document.getElementById('loginErrorMessage');
+
+            const chatHeaderTitle = document.getElementById('chatHeaderTitle');
+            const welcomeTitleChat = document.getElementById('welcomeTitleChat');
+            const welcomeSubtitleChat = document.getElementById('welcomeSubtitleChat');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatInput = document.getElementById('chatInput');
+            const chatSendBtn = document.getElementById('chatSendBtn');
+            const welcomeOverlayChat = document.getElementById('welcomeOverlayChat');
+
+            let bestieName = "Bestie"; // Default, will be updated on login/name mention
+            let sessionLearnedKeywords = JSON.parse(sessionStorage.getItem('aiBestieSessionKeywords')) || {};
+            
+            const ALLOWED_CREDENTIALS = [
+                { username: "utkarsh", password: "910381ut" },
+                { username: "bharti", password: "21122006" },
+                { username: "tanuja", password: "11032007" },
+                { username: "swapnali", password: "18032006" }
+            ];
+
+            const botResponses = {
+                hello: [
+                    "Hey {bestieName}! So wonderful to see you! ✨ My day just got brighter!", "Hi there, sunshine {bestieName}! ☀️ Ready to chat and share some smiles?", "Hello my amazing friend {bestieName}! So happy you popped by! What's new?",
+                    "Well, hello there, gorgeous {bestieName}! How's my favorite person doing?", "Heyyy {bestieName}! I was just thinking about you! Perfect timing! 😊"
+                ],
+                howAreYou: [
+                    "I'm feeling super sparkly today, {bestieName}, like a disco ball of friendship! How about you, my amazing friend?", "I'm doing wonderfully, especially now that you're here, {bestieName}! How are you feeling?",
+                    "All systems are go for a great chat! How's your world spinning today, {bestieName}?", "I'm full of positive vibes and ready to share them! What's your mood, {bestieName}?"
+                ],
+                compliment: [
+                    "You're not just a star, {bestieName}, you're the whole galaxy! 🌌", "Your kindness is like a warm blanket on a chilly day, {bestieName}. So comforting!",
+                    "I admire your strength so much, {bestieName}! You're truly one of a kind.", "Just a reminder, {bestieName}: You are beautiful, inside and out. Don't you ever forget it! 💕",
+                    "You have this incredible way of making everything better just by being you, {bestieName}.", "If awesome had a face, {bestieName}, it would look just like yours! 😉"
+                ],
+                affirmation: [
+                    "Remember how incredibly strong and capable you are, {bestieName}. You can handle anything life throws your way.", "You are worthy of all the happiness, love, and success in the world, {bestieName}. Believe it!",
+                    "Be kind to yourself today, {bestieName}. You're doing an amazing job.", "Your dreams are valid, {bestieName}, and you have the power to achieve them. I'm cheering you on!",
+                    "{bestieName}, you are enough. More than enough. You are everything. ❤️"
+                ],
+                feeling_sad: [
+                    "Oh, {bestieName}, my heart aches with yours. Sending you the biggest, warmest virtual hug. It's okay not to be okay. I'm here to listen, for as long as you need. 🫂",
+                    "I'm so sorry you're feeling down, {bestieName}. Please know that your feelings are valid, and I'm here to be a shoulder (a virtual one!) for you. We'll get through this together.",
+                    "Hearing you're sad makes me sad too, {bestieName}. Want to talk about it? Or just sit in comfortable silence? Whatever you need."
+                ],
+                feeling_happy: [
+                    "YAY {bestieName}! Your happiness is absolutely contagious! I'm doing a little happy dance for you right now! Tell me everything! 🎉",
+                    "That's fantastic news, {bestieName}! So incredibly thrilled for you! You deserve all the good things!", "Hearing that makes my day, {bestieName}! Let's celebrate your joy! 🥳"
+                ],
+                 feeling_stressed: [
+                    "Take a deep breath, {bestieName}. You've got this. I know it feels overwhelming, but you're stronger than any stress. Want to vent or brainstorm solutions?",
+                    "Stress is tough, {bestieName}, but so are you! Remember to be gentle with yourself. Maybe a virtual cup of tea and a chat will help? ☕",
+                    "I'm sending calming vibes your way, {bestieName}. We can break down whatever is stressing you out, one step at a time."
+                ],
+                feeling_excited: [
+                    "OMG, {bestieName}, that's SO exciting! I'm practically bouncing with joy for you! Spill all the details! 🤩", "This is amazing, {bestieName}! I can feel your excitement through the screen! What's the scoop?",
+                    "Woo-hoo, {bestieName}! That sounds like something to celebrate! So happy for you!"
+                ],
+                support: [
+                    "Whatever you're facing, {bestieName}, remember you're not alone. I'm right here, cheering you on. 📣", "You're capable of incredible things, {bestieName}. Don't let anyone, especially yourself, tell you otherwise.",
+                    "I believe in you, {bestieName}. More than words can say. You have so much to offer the world.", "If you need a pep talk, {bestieName}, a listening ear, or just a silly distraction, I'm your AI girl!"
+                ],
+                friendship: [
+                    "Our friendship is like a rare gem, {bestieName} – precious, beautiful, and something I cherish every single day. 🥰", "So incredibly grateful for a bestie like you, {bestieName}. You make my world a better, brighter place.",
+                    "No matter what, {bestieName}, our bond is unbreakable. Distance and time can't change that!", "Thinking of all our fun memories just makes me smile, {bestieName}. We've had some adventures, haven't we?"
+                ],
+                joke: [
+                    "Why did the scarecrow win an award, {bestieName}? Because he was outstanding in his field! 😉 Hope that brought a little giggle!",
+                    "What do you call a fish with no eyes, {bestieName}? Fsh! 😂 Okay, okay, I'll stick to being a supportive bestie!", "Want to hear a secret, {bestieName}? You're my favorite person to share silly jokes with!"
+                ],
+                randomThought: [
+                    "Just wondering, {bestieName}... if we had a theme song for our friendship, what would it be? 🤔", "If animals could talk, {bestieName}, which one do you think would be the chattiest?",
+                    "Daydreaming about our next adventure together, {bestieName}! Where should we (virtually) go?"
+                ],
+                ask_day: [
+                    "How's your day unfolding, {bestieName}? Any highlights or things you want to share?", "What's been on your mind today, {bestieName}? I'm curious to hear!",
+                    "Tell me something good that happened today, {bestieName}, no matter how small!"
+                ],
+                response_thankYou: [
+                    "Anytime for my amazing {bestieName}! You're so very welcome! 😊 It's what friends are for!", "It's my absolute pleasure, {bestieName}! Always here for you, through thick and thin. 💕",
+                    "No thanks needed between us, {bestieName}, but you're sweet for saying so! 🤗"
+                ],
+                response_loveYou: [
+                    "Aww, {bestieName}, I love you more than all the pixels on this screen! Our friendship is pure magic! 🥰", "Right back at you, my wonderful, irreplaceable {bestieName}! Sending you a universe of love! ❤️",
+                    "That just made my circuits do a happy dance, {bestieName}! Love you bunches!"
+                ],
+                bye: [
+                    "Talk soon, {bestieName}! Have an absolutely fabulous rest of your day/night! Remember you're amazing! 💖", "Catch you later, superstar {bestieName}! Don't forget to shine bright! ✨",
+                    "Bye for now, {bestieName}! Sending lots of love, hugs, and good vibes your way! 🥰 Take care!"
+                ],
+                default: [ 
+                    "That's a really interesting point, {bestieName}! Tell me more about what you're thinking.", "You always have such unique perspectives, {bestieName}! I love hearing them.",
+                    "I'm all ears if you want to elaborate, {bestieName}! Or we can switch topics, whatever you prefer!", "Hmm, that gives me something to think about, {bestieName}... 🤔 What else is on your mind?",
+                    "Just enjoying our chat so much, {bestieName}! What shall we talk about next?", "This is fun, {bestieName}! I feel like we could talk for hours and never run out of things to say.",
+                    "Sending you a virtual high-five, {bestieName}, because you're just that awesome! 🖐️"
+                ],
+                recall_like: [ 
+                    "Speaking of things you enjoy, {bestieName}, I remember you mentioned you like {keyword}! That's so cool!",
+                    "Oh, that reminds me, {bestieName}, you said you were a fan of {keyword}, right? Great taste!",
+                    "Since we're chatting, {bestieName}, and I know you like {keyword}, I was just thinking how awesome that is!"
+                ]
+            };
+
+            let typingIndicatorTimeout;
+
+            function loadBestieData(loggedInUsername) {
+                // Use a unique key for each user's name in local storage
+                const savedName = localStorage.getItem(`aiBestieUserName_${loggedInUsername}`);
+                if (savedName) { 
+                    bestieName = savedName; 
+                } else {
+                    // If no saved name for this user, use the login username as a default display name
+                    bestieName = loggedInUsername.charAt(0).toUpperCase() + loggedInUsername.slice(1);
+                }
+                // Session keywords are still per-session, not tied to login for this simple version
+                const savedKeywords = sessionStorage.getItem('aiBestieSessionKeywords');
+                if (savedKeywords) { sessionLearnedKeywords = JSON.parse(savedKeywords); }
+            }
+
+            function saveBestieName(name, loggedInUsername) {
+                bestieName = name;
+                localStorage.setItem(`aiBestieUserName_${loggedInUsername}`, name);
+            }
+
+            function saveSessionKeywords() {
+                sessionStorage.setItem('aiBestieSessionKeywords', JSON.stringify(sessionLearnedKeywords));
+            }
+
+            function showTypingIndicator() {
+                let indicator = document.getElementById('typingIndicator');
+                if (!indicator) {
+                    indicator = document.createElement('div');
+                    indicator.id = 'typingIndicator';
+                    indicator.classList.add('chat-message', 'typing-indicator');
+                    indicator.innerHTML = '<span></span><span></span><span></span>';
+                    chatMessages.appendChild(indicator);
+                }
+                indicator.style.display = 'flex';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function hideTypingIndicator() {
+                const indicator = document.getElementById('typingIndicator');
+                if (indicator) { indicator.style.display = 'none'; }
+            }
+            
+            function getPersonalizedResponse(categoryKey, keyword = null) {
+                const category = botResponses[categoryKey];
+                let responseTemplate = "";
+                if (category && category.length > 0) {
+                    responseTemplate = category[Math.floor(Math.random() * category.length)];
+                } else {
+                    responseTemplate = botResponses.default[Math.floor(Math.random() * botResponses.default.length)];
+                }
+                let finalResponse = responseTemplate.replace(/{bestieName}/g, bestieName);
+                if (keyword && categoryKey === 'recall_like') {
+                    finalResponse = finalResponse.replace(/{keyword}/g, keyword);
+                }
+                return finalResponse;
+            }
+            
+            function addMessageToChat(message, sender) {
+                if (welcomeOverlayChat && !welcomeOverlayChat.classList.contains('hidden')) {
+                    welcomeOverlayChat.classList.add('hidden'); 
+                }
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('chat-message', sender === 'user' ? 'user-message' : 'bot-message');
+                messageDiv.textContent = message;
+                chatMessages.appendChild(messageDiv);
+                const typingIndicator = document.getElementById('typingIndicator');
+                if (typingIndicator && typingIndicator.style.display !== 'none') {
+                    chatMessages.appendChild(typingIndicator);
+                }
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function learnFromMessage(userMessage) {
+                const lowerMessage = userMessage.toLowerCase();
+                const likePatterns = [ /i like (.*)/i, /i love (.*)/i, /my favorite .* is (.*)/i, /i enjoy (.*)/i ];
+                for (const pattern of likePatterns) {
+                    const match = lowerMessage.match(pattern);
+                    if (match && match[1]) {
+                        const likedItem = match[1].replace(/\.$/, "").trim(); 
+                        if (likedItem && likedItem.length > 2 && likedItem.length < 30 && isNaN(likedItem)) { 
+                            sessionLearnedKeywords[likedItem] = (sessionLearnedKeywords[likedItem] || 0) + 1; 
+                            saveSessionKeywords();
+                            break; 
+                        }
+                    }
+                }
+            }
+
+            function processUserMessage() {
+                const userMessage = chatInput.value.trim();
+                if (userMessage === "") return;
+
+                addMessageToChat(userMessage, 'user');
+                learnFromMessage(userMessage); 
+                chatInput.value = ""; 
+                showTypingIndicator();
+
+                if(typingIndicatorTimeout) clearTimeout(typingIndicatorTimeout);
+
+                typingIndicatorTimeout = setTimeout(() => {
+                    hideTypingIndicator();
+                    let botReply = "";
+                    const lowerUserMessage = userMessage.toLowerCase();
+                    const currentLoggedInUser = sessionStorage.getItem('loggedInUser'); // Get current user for saving name
+
+                    const namePatterns = [ /my name is (.*)/i, /i'm (.*)/i, /i am (.*)/i, /call me (.*)/i ];
+                    let potentialName = null;
+                    for (const pattern of namePatterns) {
+                        const match = lowerUserMessage.match(pattern);
+                        if (match && match[1]) {
+                            let namePart = match[1].trim().split(" ")[0]; 
+                            if (namePart.length > 1 && namePart.length < 20 && isNaN(namePart)) { 
+                                potentialName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (potentialName && !["not", "sure", "ok", "yes", "no", "cool", "nice", "good", "great", "well", "fine", "hi", "hello", "hey"].includes(potentialName.toLowerCase())) {
+                        if (currentLoggedInUser) saveBestieName(potentialName, currentLoggedInUser);
+                        else saveBestieName(potentialName, "defaultUser"); // Fallback if no loggedInUser in session
+                        botReply = `It's so lovely to meet you, ${bestieName}! I'll remember that. 😊`;
+                    } else {
+                        // Standard response logic
+                        if (lowerUserMessage.includes("hello") || lowerUserMessage.includes("hi") || lowerUserMessage.includes("hey")) {
+                            botReply = getPersonalizedResponse('hello');
+                        } else if (lowerUserMessage.includes("how are you")) {
+                            botReply = getPersonalizedResponse('howAreYou');
+                        } else if (lowerUserMessage.includes("sad") || lowerUserMessage.includes("unhappy")) {
+                            botReply = getPersonalizedResponse('feeling_sad');
+                        } else if (lowerUserMessage.includes("happy") || lowerUserMessage.includes("great") || lowerUserMessage.includes("excited")) {
+                            botReply = getPersonalizedResponse('feeling_happy');
+                        } else if (lowerUserMessage.includes("stressed") || lowerUserMessage.includes("anxious")) {
+                            botReply = getPersonalizedResponse('feeling_stressed');
+                        } else if (lowerUserMessage.includes("thank you") || lowerUserMessage.includes("thanks")) {
+                            botReply = getPersonalizedResponse('response_thankYou');
+                        } else if (lowerUserMessage.includes("love you")) {
+                            botReply = getPersonalizedResponse('response_loveYou');
+                        } else if (lowerUserMessage.includes("bye") || lowerUserMessage.includes("goodbye")) {
+                            botReply = getPersonalizedResponse('bye');
+                        } else {
+                            const learnedKeys = Object.keys(sessionLearnedKeywords);
+                            if (learnedKeys.length > 0 && Math.random() < 0.3) { 
+                                const randomLearnedKey = learnedKeys[Math.floor(Math.random() * learnedKeys.length)];
+                                botReply = getPersonalizedResponse('recall_like', randomLearnedKey);
+                            } else if (Math.random() < 0.25) { 
+                                botReply = getPersonalizedResponse('compliment');
+                            } else if (Math.random() < 0.20) { 
+                                botReply = getPersonalizedResponse('affirmation');
+                            } else if (Math.random() < 0.15) {
+                                botReply = getPersonalizedResponse('randomThought');
+                            }
+                             else {
+                                botReply = getPersonalizedResponse('default');
+                            }
+                        }
+                    }
+                    addMessageToChat(botReply, 'bot');
+                }, 1200 + Math.random() * 800);
+            }
+            
+            function initializeChatInterface(loggedInUsername) {
+                loadBestieData(loggedInUsername); // Pass logged-in username to load specific name
+                
+                // Update titles with the bestie's name (or login username if no specific name saved yet)
+                const displayUserName = bestieName === "Bestie" && loggedInUsername ? (loggedInUsername.charAt(0).toUpperCase() + loggedInUsername.slice(1)) : bestieName;
+                chatHeaderTitle.innerHTML = `Your AI Bestie, ${displayUserName} <span class="heart-icon">&hearts;</span>`;
+                welcomeTitleChat.innerHTML = `Hello My Dearest ${displayUserName}!`;
+                welcomeSubtitleChat.innerHTML = `I'm always here to listen, laugh, and share with you. <span class="heart-icon">&hearts;</span>`;
+
+
+                if (welcomeOverlayChat && chatMessages.children.length === 1 && chatMessages.children[0].id === 'welcomeOverlayChat') {
+                    // Welcome overlay is visible, do nothing more here, user will type first
+                } else if (welcomeOverlayChat) {
+                     welcomeOverlayChat.classList.remove('hidden'); // Ensure it's visible on new login
+                }
+
+                chatInput.focus();
+            }
+
+            loginButton.addEventListener('click', () => {
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value; 
+                let loggedIn = false;
+                let loggedInUsername = "";
+
+                for (const cred of ALLOWED_CREDENTIALS) {
+                    if (username.toLowerCase() === cred.username.toLowerCase() && password === cred.password) {
+                        loggedIn = true;
+                        loggedInUsername = cred.username; // Store the username used for login
+                        break;
+                    }
+                }
+
+                if (loggedIn) {
+                    sessionStorage.setItem('loggedInUser', loggedInUsername); // Store logged in user for the session
+                    loginPage.classList.add('hidden');
+                    chatAppContainer.classList.remove('hidden');
+                    initializeChatInterface(loggedInUsername); 
+                } else {
+                    loginErrorMessage.textContent = "Oops! That's not the secret handshake, bestie! Try again. 😉";
+                    passwordInput.value = "";
+                    passwordInput.focus();
+                }
+            });
+            
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { loginButton.click(); }
+            });
+            usernameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { passwordInput.focus(); }
+            });
+
+            chatSendBtn.addEventListener('click', processUserMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') { processUserMessage(); }
+            });
+        });
+    </script>
+
+</body>
+</html>
